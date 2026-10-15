@@ -3,5 +3,5 @@
 Template reutilizable (un negocio = un despliegue).
 
 - `ARCHITECTURE-PLAN.md` — plan de arquitectura.
-- `backend/` — API y agente (Python, FastAPI, LangGraph). Ver `backend/README.md`.
+- `agent-ai-backend/` — API y agente (Python, FastAPI, LangGraph). Ver `agent-ai-backend/README.md`.
 - `frontend/` — pendiente.

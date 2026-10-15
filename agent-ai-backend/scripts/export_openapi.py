@@ -1,5 +1,5 @@
 """Exporta el esquema OpenAPI de la API (de ahí el frontend genera sus tipos). No necesita servidor ni LLM.
-Uso: uv run python -m scripts.export_openapi ../frontend/openapi.json"""
+Uso: uv run python -m scripts.export_openapi ../agent-ai-frontend/openapi.json"""
 
 import json
 import os
