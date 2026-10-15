@@ -1,0 +1,27 @@
+services:
+  backend:
+    build: ./agent-ai-backend
+    env_file: ./agent-ai-backend/.env
+    environment:
+      DATABASE_URL: sqlite:////data/demo.db
+      SEED_KB: examples/coffee-shop/kb.yaml
+    volumes:
+      - backend-data:/data
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build: ./agent-ai-frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "5173:80"
+
+volumes:
+  backend-data:
