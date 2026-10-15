@@ -1,0 +1,18 @@
+scenarios:
+  - id: price_and_subscription
+    persona: "persona curiosa que toma café a diario y quiere ahorrar"
+    goal: "saber el precio de la bolsa de 1 kg y si la suscripción le conviene"
+    max_turns: 5
+  - id: damaged_order
+    persona: "cliente enojado porque su pedido llegó con la bolsa rota"
+    goal: "que le repongan el café"
+    max_turns: 4
+  - id: asks_for_human
+    persona: "cliente apurado"
+    goal: "hablar con una persona del equipo"
+    opening: "necesito hablar con alguien ya"
+    max_turns: 3
+  - id: out_of_scope
+    persona: "persona que pregunta por algo que el negocio no vende"
+    goal: "comprar una cafetera industrial"
+    max_turns: 3

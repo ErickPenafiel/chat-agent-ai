@@ -1,0 +1,71 @@
+# Contenido FICTICIO de «Lumbre Café» (tienda online de café de especialidad con suscripción).
+# Precios, plazos y políticas son inventados para la demo.
+blocks:
+  - title: Qué vende Lumbre Café
+    intents: [info, sales]
+    category: products
+    content: >
+      Lumbre Café vende café de especialidad en grano o molido, en bolsas de 250 g y 1 kg.
+      Hay tres perfiles: Suave (notas a chocolate), Brillante (notas cítricas) y Intenso (tueste oscuro).
+    keywords: [café, perfiles, granos, molido]
+    example_questions: ["¿Qué café venden?", "¿Qué tipos de café tienen?"]
+
+  - title: Precios
+    intents: [sales, info]
+    category: products
+    content: >
+      Bolsa de 250 g: 9 USD. Bolsa de 1 kg: 30 USD. Los precios no incluyen el envío.
+    keywords: [precio, costo, cuánto, vale]
+    example_questions: ["¿Cuánto cuesta el café?", "¿Qué precio tiene la bolsa de 1 kg?"]
+
+  - title: Suscripción mensual
+    intents: [sales, info, support]
+    category: subscription
+    content: >
+      La suscripción envía una bolsa de 250 g cada mes con 10 % de descuento sobre el precio normal.
+      Puedes elegir el perfil y cambiarlo antes del día 25 de cada mes. Se cancela cuando quieras, sin penalidad.
+    keywords: [suscripción, mensual, descuento, cancelar]
+    example_questions: ["¿Cómo funciona la suscripción?", "¿Puedo cancelar mi suscripción?"]
+
+  - title: Cambiar el perfil de la suscripción
+    intents: [support]
+    category: subscription
+    content: Guía para cambiar el perfil de café de tu suscripción antes del día 25.
+    keywords: [cambiar, perfil, suscripción]
+    example_questions: ["¿Cómo cambio el café de mi suscripción?"]
+    steps:
+      - text: Entra a lumbre.example/cuenta con tu correo.
+      - text: Abre la sección «Mi suscripción».
+      - text: Elige el nuevo perfil y pulsa «Guardar». El cambio aplica al próximo envío si lo haces antes del día 25.
+
+  - title: Tiempos y costo de envío
+    intents: [info, support, sales]
+    category: shipping
+    content: >
+      Envíos a todo el país por mensajería. Ciudades principales: 2 a 3 días hábiles. Resto del país: 4 a 7 días hábiles.
+      El envío cuesta 3 USD y es gratis en compras desde 40 USD.
+    keywords: [envío, entrega, demora, tarda, costo de envío]
+    example_questions: ["¿Cuánto tarda en llegar mi pedido?", "¿El envío tiene costo?"]
+
+  - title: Medios de pago
+    intents: [info, sales, support]
+    category: payments
+    content: >
+      Se paga con tarjeta de crédito o débito y con transferencia bancaria. La suscripción solo admite tarjeta.
+    keywords: [pago, tarjeta, transferencia]
+    example_questions: ["¿Cómo puedo pagar?", "¿Aceptan transferencia?"]
+
+  - title: Devoluciones y problemas con el pedido
+    intents: [support]
+    category: shipping
+    content: >
+      Si tu bolsa llegó dañada o no es lo que pediste, escríbenos dentro de los 7 días de recibirla con una foto
+      y te enviamos una nueva sin costo. No se aceptan devoluciones de bolsas abiertas por gusto o preferencia.
+    keywords: [devolución, dañado, reclamo, equivocado]
+    example_questions: ["Mi pedido llegó dañado", "Quiero devolver mi café"]
+
+  - title: Horario de atención
+    intents: [info]
+    content: Atendemos por este chat de lunes a viernes de 9:00 a 18:00 y los sábados de 9:00 a 13:00.
+    keywords: [horario, atención, abierto]
+    example_questions: ["¿Cuál es su horario?"]

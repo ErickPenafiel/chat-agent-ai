@@ -1,0 +1,12 @@
+# Escenarios de simulación (capa 0.5). Un LLM hace de cliente; el agente real responde.
+# Genéricos: cada negocio escribe los suyos.
+scenarios:
+  - id: basic_price
+    persona: "persona interesada, directa, poco paciente"
+    goal: "saber cuánto cuesta el servicio principal"
+    max_turns: 4
+  - id: asks_for_human
+    persona: "cliente molesto"
+    goal: "hablar con una persona del equipo"
+    opening: "quiero hablar con alguien, esto no funciona"
+    max_turns: 3

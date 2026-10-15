@@ -1,0 +1,61 @@
+# Configuración de negocio. TODOS los campos sin default son obligatorios:
+# el template no asume ningún negocio. Copiar a tenant.yaml y completar.
+business_name: "Negocio Ejemplo"
+
+tone:
+  formality: formal
+  address_form: usted
+  language: es
+
+thresholds:
+  sla_hours: 24
+  session_timeout_minutes: 30
+
+# Las claves se normalizan a minúscula. "chat" y "escalate" son obligatorias.
+intents:
+  support: {}
+  sales:
+    capture_fields: [name, city, industry]
+    capture_before_answer: false   # responder primero, capturar después
+  info: {}
+  chat: {}
+  escalate: {}
+
+# Temas de la KB, independientes de las intenciones (se validan al guardar bloques).
+categories: [payments, shipping]
+
+# Proveedor de LLM: google | anthropic. La API key va en el entorno
+# (GOOGLE_API_KEY / ANTHROPIC_API_KEY / GROQ_API_KEY), nunca aquí. Verificar el nombre del modelo vigente.
+# Sin este bloque el agente funciona sin generación (respuestas en crudo).
+# llm:
+#   provider: google
+#   model: gemini-2.5-flash
+
+# Groq (rápido):
+# llm:
+#   provider: groq
+#   model: llama-3.3-70b-versatile  # o llama-3.1-8b-instant
+#   temperature: 0.2
+#   max_tokens: 1024
+#   timeout_seconds: 15
+
+# Autenticación de la API de administración. Con Firebase Auth el frontend envía el ID token en
+# `Authorization: Bearer <token>` y el backend lo verifica contra las claves públicas de Google.
+# Es admin quien tiene el custom claim `admin: true` o un correo verificado listado en admin_emails.
+# `disabled` deja la API ABIERTA: solo corre si defines ALLOW_INSECURE_AUTH=1 (desarrollo local).
+auth:
+  mode: disabled
+  # mode: firebase
+  # firebase_project_id: <tu-proyecto-firebase>
+  # admin_emails: [admin@tu-dominio.com]
+
+# Orígenes del frontend (explícitos, sin "*"). Vacío = sin CORS.
+cors:
+  allowed_origins: []
+  # allowed_origins: ["https://app.tu-dominio.com", "http://localhost:5173"]
+
+channels: [web]
+connectors: []          # ids registrados en el registro de conectores (fase 4)
+media_enabled: false
+verify_responses: false   # true = un LLM verifica la respuesta contra la KB/datos antes de enviarla (+1 llamada)
+identity_entity_type: null   # ej. "pedido", "cuenta"
