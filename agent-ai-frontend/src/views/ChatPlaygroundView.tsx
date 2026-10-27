@@ -332,6 +332,7 @@ export function ChatPlaygroundView({ backendOnline }: ChatPlaygroundViewProps) {
     setSessionMessages((prev) => [...prev, userMsg])
     setInput("")
 
+    // eslint-disable-next-line react-hooks/purity -- se ejecuta en un manejador de evento, no durante el render
     const startTime = performance.now()
     setIsTyping(true)
     setCurrentThoughtStep(0)
