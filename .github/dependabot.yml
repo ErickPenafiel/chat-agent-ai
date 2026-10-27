@@ -1,0 +1,17 @@
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /agent-ai-backend
+    schedule: { interval: weekly }
+  - package-ecosystem: npm
+    directory: /agent-ai-frontend
+    schedule: { interval: weekly }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }
+  - package-ecosystem: docker
+    directory: /agent-ai-backend
+    schedule: { interval: monthly }
+  - package-ecosystem: docker
+    directory: /agent-ai-frontend
+    schedule: { interval: monthly }
