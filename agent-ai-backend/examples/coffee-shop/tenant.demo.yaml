@@ -11,13 +11,17 @@ thresholds:
   session_timeout_minutes: 30
 
 intents:
-  support: {}
+  support:
+    keywords: [problema, error, no llego, roto, reclamo, devolucion, cancelar]
   sales:
     capture_fields: [name, city]
     capture_before_answer: false
-  info: {}
+    keywords: [precio, cuesta, comprar, cafe, suscripcion, plan, quiero]
+  info:
+    keywords: [horario, envio, envian, pago, pagar, donde, direccion, tarjeta]
   chat: {}
-  escalate: {}
+  escalate:
+    keywords: [humano, persona, asesor, agente]
 
 categories: [products, shipping, payments, subscription]
 

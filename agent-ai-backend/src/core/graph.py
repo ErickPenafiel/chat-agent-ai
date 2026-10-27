@@ -15,6 +15,7 @@ from src.nodes.handoff import make_handoff_node
 from src.nodes.identity import EntityResolver, make_identity_node, no_resolver
 from src.nodes.intent import Classifier, default_classifier, make_intent_node
 from src.nodes.jev_classifier import make_jev_classifier
+from src.nodes.keyword_classifier import make_keyword_classifier
 from src.nodes.llm_classifier import make_llm_classifier
 from src.nodes.media import make_media_node
 from src.nodes.response import make_response_node
@@ -47,6 +48,8 @@ def build_graph(
     valid_issues = frozenset(i for c in registry for i in c.issues)
     if llm is not None and classifier is default_classifier:
         classifier = make_llm_classifier(llm, prompts)
+    elif classifier is default_classifier and any(c.keywords for c in config.intents.values()):
+        classifier = make_keyword_classifier(config)
     if jev is not None and config.jev is not None:
         classifier = make_jev_classifier(
             jev,

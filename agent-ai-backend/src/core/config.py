@@ -26,6 +26,8 @@ class Thresholds(_Strict):
 
 class IntentConfig(_Strict):
     description: str | None = None  # ayuda al clasificador (Jev) a distinguir intenciones propias
+    # Palabras clave del clasificador local (sin LLM ni Jev); coincidencia por subcadena, sin acentos.
+    keywords: list[str] = []
     capture_fields: list[str] = []
     # Default false: responder primero, capturar datos del lead después.
     capture_before_answer: bool = False
