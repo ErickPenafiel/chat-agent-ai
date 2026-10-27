@@ -2,13 +2,12 @@ import logging
 
 import httpx
 
-from tests.helpers import authed_client as TestClient
-
 from src.api.app import create_app
 from src.core.config import load_tenant_config
 from src.llm.fake import FakeLLM
 from src.llm.groq import GroqLLM
 from src.llm.health import verify_llm
+from tests.helpers import authed_client as TestClient
 
 
 # ---------- tope de longitud de entrada ----------
@@ -65,12 +64,12 @@ def test_verify_reports_bad_key(caplog):
 
 
 # ---------- verificación anti-alucinación ----------
-import json  # noqa: E402
+import json
 
-from src.channels.base import InboundEvent  # noqa: E402
-from src.channels.web import WebChannel  # noqa: E402
-from src.core.dispatcher import handle_event_with_trace  # noqa: E402
-from src.nodes.verify import UNSUPPORTED_REPLY  # noqa: E402
+from src.channels.base import InboundEvent
+from src.channels.web import WebChannel
+from src.core.dispatcher import handle_event_with_trace
+from src.nodes.verify import UNSUPPORTED_REPLY
 
 
 def _verified_app(draft, verdict, verify=True, with_block=True):

@@ -5,7 +5,13 @@ import uuid
 from collections import defaultdict
 from collections.abc import Mapping
 
-from src.channels.base import InboundEvent, InvalidWebhook, MediaItem, MediaType, MessagingChannel
+from src.channels.base import (
+    InboundEvent,
+    InvalidWebhook,
+    MediaItem,
+    MediaType,
+    MessagingChannel,
+)
 
 
 class WebChannel(MessagingChannel):

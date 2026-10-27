@@ -43,6 +43,7 @@ def test_config_validation():
 
 def test_auth_block_is_required():
     import yaml
+
     from src.core.config import TenantConfig
 
     raw = yaml.safe_load(open("config/tenant.example.yaml", encoding="utf-8"))

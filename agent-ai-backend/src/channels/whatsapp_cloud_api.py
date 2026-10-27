@@ -7,7 +7,13 @@ from collections.abc import Mapping
 
 import httpx
 
-from src.channels.base import InboundEvent, InvalidWebhook, MediaItem, MediaType, MessagingChannel
+from src.channels.base import (
+    InboundEvent,
+    InvalidWebhook,
+    MediaItem,
+    MediaType,
+    MessagingChannel,
+)
 
 _MEDIA_KINDS = ("image", "audio", "video", "document")
 

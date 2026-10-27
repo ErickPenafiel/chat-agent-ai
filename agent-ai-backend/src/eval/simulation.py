@@ -7,8 +7,8 @@ import yaml
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session, sessionmaker
 
-from src.core.dispatcher import turn_input
 from src.channels.base import InboundEvent
+from src.core.dispatcher import turn_input
 from src.core.prompt_catalog import PromptStore
 from src.db.models import ConversationOutcome
 from src.eval.judge import format_transcript, judge_outcome

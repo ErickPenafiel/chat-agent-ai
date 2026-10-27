@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -126,11 +126,10 @@ def approve(pid: int, request: Request, db: Session = Depends(get_db), rules: KB
 
 @proposals_router.post("/{pid}/reject", response_model=ProposalOut)
 def reject(pid: int, db: Session = Depends(get_db)):
-    from datetime import timezone
 
     p = _proposal(db, pid)
     if p.status != "pending":
         raise HTTPException(409, f"la propuesta ya está {p.status}")
-    p.status, p.resolved_at = "rejected", datetime.now(timezone.utc)
+    p.status, p.resolved_at = "rejected", datetime.now(UTC)
     db.commit()
     return p

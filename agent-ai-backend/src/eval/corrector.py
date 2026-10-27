@@ -3,13 +3,14 @@
 import json
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
 from src.core.prompt_catalog import PROTECTED_PROMPTS, PromptStore, unknown_variables
-from src.db import knowledge, prompts as prompts_db
+from src.db import knowledge
+from src.db import prompts as prompts_db
 from src.db.knowledge import InvalidBlock, KBRules
 from src.db.models import ConversationOutcome, ImprovementProposal, KnowledgeBlock
 from src.eval.judge import format_transcript
@@ -124,7 +125,7 @@ def propose_improvements(
                 rationale=str(p.get("rationale", "")), evidence_outcome_ids=evidence,
             ))
             created += 1
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         for o in outcomes:
             o.corrected_at = now
         db.commit()
@@ -149,5 +150,5 @@ def apply_proposal(
             raise Conflict("el prompt cambió desde que se hizo la propuesta")
         prompts_db.set_prompt(db, pl["slug"], pl["text"], author="corrector", note=note)
     proposal.status = "approved"
-    proposal.resolved_at = datetime.now(timezone.utc)
+    proposal.resolved_at = datetime.now(UTC)
     db.commit()

@@ -2,12 +2,12 @@
 
 from langgraph.graph import END, START, StateGraph
 
+from src.connectors.registry import ConnectorRegistry, build_registry
 from src.core.config import TenantConfig
 from src.core.intents import RETRIEVAL_INTENTS
-from src.core.state import ConversationState
-from src.connectors.registry import ConnectorRegistry, build_registry
-from src.llm.base import LLMProvider
 from src.core.prompt_catalog import PromptStore
+from src.core.state import ConversationState
+from src.llm.base import LLMProvider
 from src.nodes.capture import make_capture_node
 from src.nodes.connector import make_connector_node
 from src.nodes.handoff import make_handoff_node

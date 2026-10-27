@@ -3,7 +3,6 @@ import os
 
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from langgraph.checkpoint.memory import MemorySaver
 
 from src.api import auth as auth_api
@@ -12,21 +11,21 @@ from src.api import connectors as connectors_api
 from src.api import evaluation as evaluation_api
 from src.api import knowledge_blocks
 from src.api import prompts as prompts_api
+from src.auth.firebase import FirebaseVerifier
 from src.channels.base import MessagingChannel
 from src.channels.registry import build_channels
 from src.connectors.registry import build_registry
+from src.core.config import TenantConfig, load_tenant_config
 from src.core.dispatcher import Deduper
-from src.auth.firebase import FirebaseVerifier
-from src.eval.recorder import OutcomeRecorder
+from src.core.graph import build_graph
 from src.core.prompt_catalog import PromptStore, default_prompts, prompt_variables
+from src.db.knowledge import KBRules, find_orphans
+from src.db.session import make_engine, make_session_factory
+from src.eval.recorder import OutcomeRecorder
 from src.llm.base import LLMProvider
 from src.llm.factory import build_llm
 from src.llm.health import verify_llm
-from src.core.graph import build_graph
 from src.nodes.kb_retriever import make_kb_retriever
-from src.core.config import TenantConfig, load_tenant_config
-from src.db.knowledge import KBRules, find_orphans
-from src.db.session import make_engine, make_session_factory
 
 log = logging.getLogger(__name__)
 

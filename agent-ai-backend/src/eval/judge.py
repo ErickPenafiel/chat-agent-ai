@@ -3,7 +3,7 @@
 import json
 import logging
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
@@ -39,7 +39,7 @@ def judge_outcome(db: Session, llm: LLMProvider, prompts: PromptStore, outcome: 
         log.exception("el juez falló en la conversación %s", outcome.id)
         return False
     outcome.judge_score, outcome.judge_resolved, outcome.judge_issues = v["score"], v["resolved"], v["issues"]
-    outcome.judged_at = datetime.now(timezone.utc)
+    outcome.judged_at = datetime.now(UTC)
     db.commit()
     return True
 
@@ -49,7 +49,7 @@ def evaluate_pending(
     idle_minutes: int, limit: int = 100,
 ) -> dict:
     """Juzga las conversaciones live inactivas. Simulaciones y replays se juzgan al terminar, no aquí."""
-    cutoff = datetime.now(timezone.utc) - timedelta(minutes=idle_minutes)
+    cutoff = datetime.now(UTC) - timedelta(minutes=idle_minutes)
     done = failed = 0
     with session_factory() as db:
         q = select(ConversationOutcome).where(

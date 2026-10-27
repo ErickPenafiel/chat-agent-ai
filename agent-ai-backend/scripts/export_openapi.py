@@ -8,8 +8,8 @@ import sys
 # El esquema no depende de la autenticación; el modo abierto solo evita exigir Firebase para exportarlo.
 os.environ.setdefault("ALLOW_INSECURE_AUTH", "1")
 
-from src.api.app import create_app  # noqa: E402
-from src.core.config import load_tenant_config  # noqa: E402
+from src.api.app import create_app
+from src.core.config import load_tenant_config
 
 
 def main() -> None:

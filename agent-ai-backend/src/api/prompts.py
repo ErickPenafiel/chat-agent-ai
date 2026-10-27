@@ -1,6 +1,7 @@
+from datetime import datetime
+
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
-from datetime import datetime
 
 from src.core.prompt_catalog import KNOWN_VARIABLES, PromptStore, unknown_variables
 from src.db import prompts as prompts_db

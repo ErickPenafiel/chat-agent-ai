@@ -1,10 +1,10 @@
 import pytest
-from tests.helpers import authed_client as TestClient
 
 from src.api.app import create_app
 from src.core.config import load_tenant_config
 from src.core.graph import build_graph
 from src.nodes.kb_retriever import make_kb_retriever
+from tests.helpers import authed_client as TestClient
 
 
 @pytest.fixture

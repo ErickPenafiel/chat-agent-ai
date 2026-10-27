@@ -6,14 +6,13 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient as PlainClient
 
-from tests.helpers import authed_client as TestClient
-
 from src.api.app import create_app
 from src.channels.base import InvalidWebhook
 from src.channels.registry import build_channels
 from src.channels.web import WebChannel
 from src.channels.whatsapp_cloud_api import WhatsAppCloudAPIChannel
 from src.core.config import load_tenant_config
+from tests.helpers import authed_client as TestClient
 
 
 # ---------- web mock ----------
@@ -160,10 +159,11 @@ def test_whatsapp_endpoint_with_signature_and_handshake():
 
 def test_conversation_state_persists_across_turns():
     """La captura multi-turno solo funciona si el checkpointer conserva el estado entre mensajes."""
-    from src.core.graph import build_graph
     from langgraph.checkpoint.memory import MemorySaver
-    from src.core.dispatcher import handle_event
+
     from src.channels.base import InboundEvent
+    from src.core.dispatcher import handle_event
+    from src.core.graph import build_graph
 
     cfg = load_tenant_config("config/tenant.example.yaml")
     g = build_graph(cfg, classifier=lambda m, e: "sales", checkpointer=MemorySaver())

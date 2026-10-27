@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from src.auth.deps import AuthUser, require_admin
 
-__all__ = ["router", "require_admin"]
+__all__ = ["require_admin", "router"]
 
 router = APIRouter(tags=["auth"])
 

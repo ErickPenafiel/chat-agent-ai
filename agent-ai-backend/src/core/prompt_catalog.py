@@ -1,7 +1,6 @@
 """Qué prompts necesita este despliegue: sale de las intenciones y los conectores activos, no de una lista fija."""
 
 import re
-from collections.abc import Callable
 
 from sqlalchemy.orm import Session, sessionmaker
 

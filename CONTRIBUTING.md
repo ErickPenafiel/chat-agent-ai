@@ -1,7 +1,7 @@
 # Cómo contribuir
 
 1. Haz un fork y crea una rama desde `main`.
-2. Backend (`agent-ai-backend/`): `uv sync && uv run pytest`.
+2. Backend (`agent-ai-backend/`): `uv sync && uv run ruff check . && uv run pytest`.
 3. Frontend (`agent-ai-frontend/`): `pnpm install && pnpm lint && pnpm build`.
 4. Abre un pull request describiendo el cambio; el CI debe pasar.
 

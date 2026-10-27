@@ -2,7 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 
 from src.api.schemas import (
-    KnowledgeBlockCreate, KnowledgeBlockOut, KnowledgeBlockUpdate, OrphanOut, VersionOut, _check_steps,
+    KnowledgeBlockCreate,
+    KnowledgeBlockOut,
+    KnowledgeBlockUpdate,
+    OrphanOut,
+    VersionOut,
+    _check_steps,
 )
 from src.db import knowledge
 from src.db.knowledge import KBRules

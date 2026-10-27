@@ -2,8 +2,6 @@ import json
 
 import httpx
 import pytest
-from tests.helpers import authed_client as TestClient
-from langgraph.checkpoint.memory import MemorySaver
 
 from src.api.app import create_app
 from src.channels.base import InboundEvent
@@ -15,6 +13,7 @@ from src.llm.base import LLMError
 from src.llm.factory import build_llm
 from src.llm.fake import FakeLLM
 from src.llm.google import GoogleGenAI
+from tests.helpers import authed_client as TestClient
 
 
 # ---------- proveedores ----------

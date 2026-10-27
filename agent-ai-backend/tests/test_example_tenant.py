@@ -1,7 +1,6 @@
 import json
 
 import pytest
-from tests.helpers import authed_client as TestClient
 
 from src.api.app import create_app
 from src.core.config import load_tenant_config
@@ -10,6 +9,7 @@ from src.db.kb_loader import KBFileError, load_kb_file, sync_blocks
 from src.db.knowledge import KBRules
 from src.eval.simulation import load_scenarios
 from src.llm.fake import FakeLLM
+from tests.helpers import authed_client as TestClient
 
 EX = "examples/coffee-shop"
 
@@ -79,7 +79,6 @@ def test_wrong_category_in_file_fails_sync(app):
 
 def test_end_to_end_chat_over_example_kb(app):
     _sync(app)
-    c = TestClient(app)
     # sin LLM: el clasificador por defecto manda a «chat»; se verifica el camino completo hasta la KB con un LLM falso
     def handler(system, user, json_mode):
         if json_mode:

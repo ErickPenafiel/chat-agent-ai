@@ -1,7 +1,7 @@
 """Une canal y grafo: evento entrante -> grafo -> respuesta saliente por el mismo canal."""
 
-from collections import OrderedDict
 import logging
+from collections import OrderedDict
 from dataclasses import asdict, replace
 
 from src.channels.base import InboundEvent, MessagingChannel

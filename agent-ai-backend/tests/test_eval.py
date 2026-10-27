@@ -1,8 +1,7 @@
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
-from tests.helpers import authed_client as TestClient
 
 from src.api.app import create_app
 from src.channels.base import InboundEvent
@@ -17,6 +16,7 @@ from src.eval.replay import replay_user
 from src.eval.rules import evaluate_rules
 from src.eval.simulation import Scenario, load_scenarios, run_scenario
 from src.llm.fake import FakeLLM
+from tests.helpers import authed_client as TestClient
 
 
 def make(handler, **cfg_over):
@@ -78,7 +78,7 @@ def test_new_conversation_after_session_timeout():
     say(app, "hola", mid="1")
     with app.state.session_factory() as db:
         o = db.query(ConversationOutcome).one()
-        o.updated_at = datetime.now(timezone.utc) - timedelta(minutes=31)  # timeout del ejemplo: 30
+        o.updated_at = datetime.now(UTC) - timedelta(minutes=31)  # timeout del ejemplo: 30
         db.commit()
     say(app, "volví", mid="2")
     assert len(outcomes(app)) == 2
@@ -88,7 +88,7 @@ def test_new_conversation_after_session_timeout():
 def test_parse_verdict_validates():
     assert parse_verdict('```json\n{"score": 4, "resolved": true}\n```')["score"] == 4
     for bad in ('{"score": 9}', "nada", '{"resolved": true}'):
-        with pytest.raises(Exception):
+        with pytest.raises((ValueError, KeyError)):
             parse_verdict(bad)
 
 
@@ -99,7 +99,7 @@ def test_judge_only_idle_live_conversations():
     assert evaluate_pending(st.session_factory, st.llm, st.prompts, 30) == {"judged": 0, "failed": 0}  # aún activa
     with st.session_factory() as db:
         o = db.query(ConversationOutcome).one()
-        o.updated_at = datetime.now(timezone.utc) - timedelta(minutes=45)
+        o.updated_at = datetime.now(UTC) - timedelta(minutes=45)
         db.commit()
     assert evaluate_pending(st.session_factory, st.llm, st.prompts, 30) == {"judged": 1, "failed": 0}
     [o] = outcomes(app)
@@ -115,7 +115,7 @@ def test_judge_failure_leaves_pending_for_retry():
     app, _, _ = make(handler)
     say(app, "hola", mid="1")
     with app.state.session_factory() as db:
-        db.query(ConversationOutcome).one().updated_at = datetime.now(timezone.utc) - timedelta(hours=1)
+        db.query(ConversationOutcome).one().updated_at = datetime.now(UTC) - timedelta(hours=1)
         db.commit()
     st = app.state
     assert evaluate_pending(st.session_factory, st.llm, st.prompts, 30) == {"judged": 0, "failed": 1}
@@ -139,7 +139,7 @@ def test_simulation_fixed_opening_and_scenario_file():
     app, fake, _ = make(agent)
     st = app.state
     sc = Scenario(id="s2", persona="p", goal="g", opening="mensaje fijo", max_turns=2)
-    oid = run_scenario(st.graph, st.llm, st.prompts, st.recorder, st.session_factory, sc, judge=False)
+    run_scenario(st.graph, st.llm, st.prompts, st.recorder, st.session_factory, sc, judge=False)
     assert outcomes(app)[0].transcript[0]["content"] == "mensaje fijo"
     assert outcomes(app)[0].judge_score is None
     assert len(load_scenarios("config/scenarios.example.yaml")) == 2

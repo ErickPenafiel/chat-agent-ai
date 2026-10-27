@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from src.api.schemas import KnowledgeBlockCreate
 from src.db import knowledge
 from src.db.knowledge import KBRules
-from src.db.models import KnowledgeBlock, KnowledgeBlockVersion
+from src.db.models import KnowledgeBlockVersion
 
 AUTHOR = "seed"
 _COMPARED = ("content", "intents", "category", "keywords", "example_questions", "attachments", "steps", "meta", "status")

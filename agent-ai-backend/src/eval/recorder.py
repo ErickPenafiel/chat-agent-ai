@@ -1,6 +1,6 @@
 """Registra cada turno en conversation_outcomes (capas 0 y 1)."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
@@ -11,7 +11,7 @@ from src.eval.rules import evaluate_rules
 
 def aware(dt: datetime) -> datetime:
     """SQLite devuelve datetimes sin zona; se tratan como UTC."""
-    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+    return dt if dt.tzinfo else dt.replace(tzinfo=UTC)
 
 
 def _latest(db: Session, thread_id: str, source: str) -> ConversationOutcome | None:
@@ -32,7 +32,7 @@ class OutcomeRecorder:
         source: str = "live", scenario: str | None = None,
     ) -> int:
         """Agrega el turno a la sesión en curso; si pasó el timeout de sesión, abre una conversación nueva."""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         with self._sf() as db:
             o = _latest(db, thread_id, source)
             if o is None or now - aware(o.updated_at) > self._timeout:

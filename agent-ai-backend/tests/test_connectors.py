@@ -1,11 +1,11 @@
 import pytest
-from tests.helpers import authed_client as TestClient
 
 from src.api.app import create_app
-from src.connectors.base import Connector, ConnectorResult
+from src.connectors.base import Connector
 from src.connectors.registry import ConnectorRegistry, build_registry
 from src.core.config import load_tenant_config
 from src.core.graph import build_graph
+from tests.helpers import authed_client as TestClient
 
 
 @pytest.fixture
