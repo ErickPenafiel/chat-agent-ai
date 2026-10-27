@@ -8,11 +8,13 @@ from src.core.intents import RETRIEVAL_INTENTS
 from src.core.prompt_catalog import PromptStore
 from src.core.state import ConversationState
 from src.llm.base import LLMProvider
+from src.llm.jev import JevClient
 from src.nodes.capture import make_capture_node
 from src.nodes.connector import make_connector_node
 from src.nodes.handoff import make_handoff_node
 from src.nodes.identity import EntityResolver, make_identity_node, no_resolver
 from src.nodes.intent import Classifier, default_classifier, make_intent_node
+from src.nodes.jev_classifier import make_jev_classifier
 from src.nodes.llm_classifier import make_llm_classifier
 from src.nodes.media import make_media_node
 from src.nodes.response import make_response_node
@@ -37,13 +39,22 @@ def build_graph(
     entity_resolver: EntityResolver = no_resolver,
     llm: LLMProvider | None = None,
     prompts: PromptStore | None = None,
+    jev: JevClient | None = None,
 ):
     registry = connectors if connectors is not None else build_registry(config.connectors)
     if llm is not None and prompts is None:
         raise ValueError("llm requiere prompts (PromptStore)")
+    valid_issues = frozenset(i for c in registry for i in c.issues)
     if llm is not None and classifier is default_classifier:
         classifier = make_llm_classifier(llm, prompts)
-    valid_issues = frozenset(i for c in registry for i in c.issues)
+    if jev is not None and config.jev is not None:
+        classifier = make_jev_classifier(
+            jev,
+            {k: v.description for k, v in config.intents.items() if v.description},
+            valid_issues,
+            config.jev.min_confidence,
+            fallback=None if classifier is default_classifier else classifier,
+        )
 
     g = StateGraph(ConversationState)
 

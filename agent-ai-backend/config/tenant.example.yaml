@@ -39,6 +39,14 @@ categories: [payments, shipping]
 #   max_tokens: 1024
 #   timeout_seconds: 15
 
+# Clasificador de intenciones con Jev (TypeSafe AI, lista de espera). Clave en TYPESAFE_API_KEY.
+# Ante fallo o confianza baja usa el clasificador por LLM. Los mensajes del cliente se envían a TypeSafe.
+# jev:
+#   model: jev-latest   # conviene fijar una versión concreta tras evaluarla
+#   timeout_seconds: 10
+#   min_confidence: 0.5
+# Para ayudar a distinguir intenciones propias: intents: { mi_intencion: { description: "…" } }
+
 # Autenticación de la API de administración. Con Firebase Auth el frontend envía el ID token en
 # `Authorization: Bearer <token>` y el backend lo verifica contra las claves públicas de Google.
 # Es admin quien tiene el custom claim `admin: true` o un correo verificado listado en admin_emails.

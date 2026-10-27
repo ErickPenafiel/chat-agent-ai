@@ -25,6 +25,7 @@ from src.eval.recorder import OutcomeRecorder
 from src.llm.base import LLMProvider
 from src.llm.factory import build_llm
 from src.llm.health import verify_llm
+from src.llm.jev import JevClient, build_jev
 from src.nodes.kb_retriever import make_kb_retriever
 
 log = logging.getLogger(__name__)
@@ -36,6 +37,7 @@ def create_app(
     create_tables: bool | None = None,
     channels: dict[str, MessagingChannel] | None = None,
     llm: LLMProvider | None = None,
+    jev: JevClient | None = None,
     entity_resolver=None,
     auth_verifier=None,
 ) -> FastAPI:
@@ -76,6 +78,7 @@ def create_app(
     app.state.llm = llm if llm is not None else build_llm(config.llm)
     if llm is None:  # solo un LLM construido desde la config toca la red; los inyectados (tests) no
         verify_llm(app.state.llm)
+    app.state.jev = jev if jev is not None else build_jev(config.jev)
     app.state.prompts = PromptStore(
         app.state.session_factory,
         default_prompts(config, app.state.connectors),
@@ -90,6 +93,7 @@ def create_app(
         connectors=app.state.connectors,
         llm=app.state.llm,
         prompts=app.state.prompts,
+        jev=app.state.jev,
         **({"entity_resolver": entity_resolver} if entity_resolver else {}),
     )
 

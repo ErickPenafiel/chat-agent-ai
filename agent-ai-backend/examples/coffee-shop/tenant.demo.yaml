@@ -1,0 +1,47 @@
+# NEGOCIO FICTICIO (variante sin LLM para `docker compose up`) — solo para demostrar el template. No representa a ningún cliente real.
+business_name: "Lumbre Café"
+
+tone:
+  formality: informal
+  address_form: tú
+  language: es
+
+thresholds:
+  sla_hours: 12
+  session_timeout_minutes: 30
+
+intents:
+  support: {}
+  sales:
+    capture_fields: [name, city]
+    capture_before_answer: false
+  info: {}
+  chat: {}
+  escalate: {}
+
+categories: [products, shipping, payments, subscription]
+
+# Variante sin claves ni LLM: el agente responde con la KB en crudo. Para respuestas generadas
+# usa tenant.yaml (LLM real) y define la clave en el entorno.
+
+
+# Autenticación de la API de administración. Con Firebase Auth el frontend envía el ID token en
+# `Authorization: Bearer <token>` y el backend lo verifica contra las claves públicas de Google.
+# Es admin quien tiene el custom claim `admin: true` o un correo verificado listado en admin_emails.
+# `disabled` deja la API ABIERTA: solo corre si defines ALLOW_INSECURE_AUTH=1 (desarrollo local).
+auth:
+  mode: disabled
+  # mode: firebase
+  # firebase_project_id: <tu-proyecto-firebase>
+  # admin_emails: [admin@tu-dominio.com]
+
+# Orígenes del frontend (explícitos, sin "*").
+cors:
+  allowed_origins: ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000"]
+
+
+channels: [web]
+connectors: []
+media_enabled: false
+verify_responses: false  # requiere LLM
+identity_entity_type: null

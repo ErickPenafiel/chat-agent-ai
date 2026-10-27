@@ -1,8 +1,13 @@
 services:
   backend:
     build: ./agent-ai-backend
-    env_file: ./agent-ai-backend/.env
+    # .env es opcional: sin él corre la demo sin LLM ni claves.
+    env_file:
+      - path: ./agent-ai-backend/.env
+        required: false
     environment:
+      TENANT_CONFIG: ${TENANT_CONFIG:-examples/coffee-shop/tenant.demo.yaml}
+      ALLOW_INSECURE_AUTH: "1"
       DATABASE_URL: sqlite:////data/demo.db
       SEED_KB: examples/coffee-shop/kb.yaml
     volumes:

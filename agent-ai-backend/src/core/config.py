@@ -25,6 +25,7 @@ class Thresholds(_Strict):
 
 
 class IntentConfig(_Strict):
+    description: str | None = None  # ayuda al clasificador (Jev) a distinguir intenciones propias
     capture_fields: list[str] = []
     # Default false: responder primero, capturar datos del lead después.
     capture_before_answer: bool = False
@@ -36,6 +37,15 @@ class LLMConfig(_Strict):
     temperature: float = Field(default=0.2, ge=0, le=2)
     max_tokens: int = Field(default=1024, gt=0)
     timeout_seconds: float = Field(default=30, gt=0)
+
+
+class JevConfig(_Strict):
+    """Clasificador de intenciones con Jev (TypeSafe AI). La clave va en TYPESAFE_API_KEY."""
+
+    model: str = "jev-latest"  # conviene fijar una versión concreta tras evaluarla
+    timeout_seconds: float = Field(default=10, gt=0)
+    # Por debajo de esta confianza se usa el clasificador por LLM (o `chat` si no hay LLM).
+    min_confidence: float = Field(default=0.5, ge=0, le=1)
 
 
 class AuthConfig(_Strict):
@@ -82,6 +92,7 @@ class TenantConfig(_Strict):
     cors: CorsConfig = CorsConfig()
     channels: list[str] = Field(min_length=1)
     connectors: list[str] = []
+    jev: JevConfig | None = None  # sin jev se clasifica con el LLM (si lo hay)
     llm: LLMConfig | None = None  # sin llm el agente responde en crudo (sin generación)
     media_enabled: bool = False
     # Guardrail anti-alucinación: un LLM compara la respuesta con la KB/datos antes de enviarla (+1 llamada por turno).
