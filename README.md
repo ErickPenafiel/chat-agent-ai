@@ -3,6 +3,8 @@
 [![CI](https://github.com/ErickPenafiel/chat-agent-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/ErickPenafiel/chat-agent-ai/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+Español · [English](README.en.md)
+
 Template reutilizable (un negocio = un despliegue).
 
 ## Quickstart
