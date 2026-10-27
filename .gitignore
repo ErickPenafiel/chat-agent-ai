@@ -21,3 +21,6 @@ test-results/
 
 # CodeGraph (índice local)
 .codegraph/
+
+# Notas de diseño internas (no se publican)
+ARCHITECTURE-PLAN.md

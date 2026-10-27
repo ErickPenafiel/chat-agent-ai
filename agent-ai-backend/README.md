@@ -1,6 +1,6 @@
 # Agente IA genérico de soporte/ventas por mensajería
 
-Template reutilizable (un negocio = un despliegue). Diseño en `../ARCHITECTURE-PLAN.md`; puesta en marcha en
+Template reutilizable (un negocio = un despliegue). Puesta en marcha en
 `docs/new-tenant-guide.md`; ejemplo completo con un negocio ficticio en `examples/coffee-shop/`.
 
 ```bash
