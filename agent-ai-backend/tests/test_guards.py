@@ -140,3 +140,13 @@ def test_verification_is_off_by_default():
     reply, trace = _turn(app)
     assert reply == "Cuesta $50." and trace["verification"] is None
     assert not any("Verificas la respuesta" in c[0] for c in fake.calls)
+
+
+def test_verifier_sees_previous_replies_so_followups_can_repeat_them():
+    app, fake = _verified_app("Apague y encienda.", {"supported": True})
+    _turn(app)
+    _turn(app, "como reinicio el equipo otra vez")
+    verifier_inputs = [c[1] for c in fake.calls if "Verificas la respuesta" in c[0]]
+    assert len(verifier_inputs) == 2
+    assert "<previous_replies>" not in verifier_inputs[0]  # el primer turno no tiene respuestas previas
+    assert "<previous_replies>\nApague y encienda.\n</previous_replies>" in verifier_inputs[1]

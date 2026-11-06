@@ -9,7 +9,7 @@ from src.core.prompt_catalog import PromptStore
 from src.core.state import ConversationState
 from src.llm.base import LLMProvider
 from src.llm.jev import JevClient
-from src.nodes.capture import make_capture_node
+from src.nodes.capture import answering_capture, make_capture_node
 from src.nodes.connector import make_connector_node
 from src.nodes.handoff import make_handoff_node
 from src.nodes.identity import EntityResolver, make_identity_node, no_resolver
@@ -76,7 +76,7 @@ def build_graph(
         intent = state["intent"]
         if intent == "escalate":
             return "handoff"
-        if state.get("awaiting_capture_field"):  # la respuesta del cliente es el dato pedido
+        if answering_capture(state):  # la respuesta del cliente es el dato pedido
             return "capture"
         capture_first = (
             config.intents[intent].capture_before_answer and _capture_pending(config, state)

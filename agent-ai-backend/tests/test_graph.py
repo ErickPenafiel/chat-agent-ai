@@ -62,3 +62,25 @@ def test_media_node_included_when_enabled(cfg):
     cfg.media_enabled = True
     out = _run(build_graph(cfg), "hola")
     assert "transcript" in out
+
+
+def test_question_while_awaiting_capture_is_not_stored_as_the_field(cfg):
+    retr = lambda q, i: [{"content": f"Respuesta a: {q}"}]
+    g = build_graph(cfg, classifier=lambda m, e: "sales", retriever=retr)
+    out = _run(g, "precio?")
+    out = _run(g, "¿Y la de 250 g?", capture=out["capture"], awaiting_capture_field=out["awaiting_capture_field"])
+    assert out["capture"] == {}  # la pregunta no es el nombre
+    assert "Respuesta a: ¿Y la de 250 g?" in out["reply"]  # se responde la consulta nueva
+    assert out["awaiting_capture_field"] == "name"  # y se sigue pidiendo el dato
+
+
+def test_asking_for_a_person_while_awaiting_capture_escalates(cfg):
+    first = _run(build_graph(cfg, classifier=lambda m, e: "sales"), "precio?")
+    g = build_graph(cfg, classifier=lambda m, e: "escalate" if "persona" in m else "sales")
+    out = _run(g, "Quiero hablar con una persona", capture=first["capture"],
+               awaiting_capture_field=first["awaiting_capture_field"])
+    assert out["handoff"] is True
+    assert out["capture"] == {}  # no se guarda como nombre
+    # y una respuesta normal sigue siendo el dato
+    ok = _run(g, "Ana", capture=first["capture"], awaiting_capture_field=first["awaiting_capture_field"])
+    assert ok["capture"] == {"name": "Ana"}

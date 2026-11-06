@@ -12,7 +12,7 @@ import re
 from src.core.prompt_catalog import PromptStore
 from src.core.state import ConversationState
 from src.llm.base import LLMProvider
-from src.nodes.response import _kb_context
+from src.nodes.response import HISTORY_TURNS, _kb_context
 
 log = logging.getLogger(__name__)
 
@@ -42,6 +42,11 @@ def make_verify_node(llm: LLMProvider, prompts: PromptStore):
             user.append(f"<kb_context>\n{_kb_context(blocks)}\n</kb_context>")
         for r in found:
             user.append(f'<system_data id="{r["id"]}">\n{json.dumps(r["data"], ensure_ascii=False)}\n</system_data>')
+        # Lo que el asistente ya dijo antes (y pasó esta verificación) respalda las repeticiones: un seguimiento
+        # como «¿y la de 250 g?» suele retomar datos de un turno anterior que ya no se recuperan de la KB.
+        previous = [m["content"] for m in state.get("messages", [])[:-2][-HISTORY_TURNS:] if m["role"] == "assistant"]
+        if previous:
+            user.append("<previous_replies>\n" + "\n".join(previous) + "\n</previous_replies>")
         user.append(f"<draft_reply>\n{state['reply']}\n</draft_reply>")
         try:
             supported, claims = _parse(llm.complete(prompts.get("verifier"), "\n\n".join(user), json_mode=True))

@@ -189,12 +189,13 @@ def test_capture_before_answer_then_answers_pending_question():
     assert "responde la consulta que dejó pendiente" in user
 
 
-def test_followup_reply_is_not_reclassified_while_capturing():
+def test_followup_reply_keeps_intent_while_capturing():
+    # Se clasifica de nuevo (para detectar «quiero una persona»), pero la intención no cambia y "Ana" es el dato.
     app, fake = _app(_classifier_then(lambda s, u: "R", intent="sales"))
     _say(app, "precio", mid="1")
     n = sum(1 for c in fake.calls if c[2])
-    _say(app, "Ana", mid="2")
-    assert sum(1 for c in fake.calls if c[2]) == n  # no hubo otra llamada de clasificación
+    assert _say(app, "Ana", mid="2")
+    assert sum(1 for c in fake.calls if c[2]) == n + 1  # una clasificación más, sin cambiar de intención
 
 
 # ---------- API de prompts ----------
