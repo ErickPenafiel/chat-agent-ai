@@ -24,3 +24,5 @@ test-results/
 
 # Notas de diseño internas (no se publican)
 ARCHITECTURE-PLAN.md
+
+agent-ai-backend/eval_reports/
