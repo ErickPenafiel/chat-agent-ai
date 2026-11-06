@@ -61,7 +61,9 @@ def handle_event_with_trace(
     out = graph.invoke(turn_input(event), thread)
     channel.send_text(event.user_id, out["reply"])
     if recorder:
-        recorder.record_turn(thread["configurable"]["thread_id"], event.channel, event.user_id, event.text, out)
+        # Con adjuntos, lo que el cliente dijo es la transcripción, no el texto vacío del evento.
+        said = out.get("transcript") or event.text
+        recorder.record_turn(thread["configurable"]["thread_id"], event.channel, event.user_id, said, out)
     if deduper:  # se marca tras el éxito: si falla, el reintento del proveedor sí se procesa
         deduper.mark(event)
     trace = {
@@ -83,6 +85,7 @@ def handle_event_with_trace(
         "unsupported_claims": out.get("unsupported_claims", []),
         "capture": out.get("capture", {}),
         "capture_done": out.get("capture_done", False),
+        "transcript": out.get("transcript"),
     }
     return out["reply"], trace
 

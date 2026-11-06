@@ -10,6 +10,7 @@ from src.channels.web import WebChannel
 from src.core.dispatcher import handle_event, handle_event_with_trace
 
 router = APIRouter(prefix="/channels", tags=["channels"])
+MAX_BODY_BYTES = 12_000_000  # un adjunto de 8 MB en base64 pesa ~10,7 MB
 
 
 def _channel(request: Request, name: str):
@@ -38,6 +39,8 @@ async def webhook(name: str, request: Request):
     if not channel.is_real:  # canal mock/de pruebas: consume LLM, no puede ser público
         await run_in_threadpool(require_admin, request)  # puede consultar claves públicas de Google (bloqueante)
     body = await request.body()
+    if len(body) > MAX_BODY_BYTES:
+        raise HTTPException(413, "el mensaje con adjuntos es demasiado grande")
     try:
         events = channel.receive(body, dict(request.headers))
     except InvalidWebhook as e:

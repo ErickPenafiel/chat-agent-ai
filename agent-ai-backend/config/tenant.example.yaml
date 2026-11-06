@@ -24,8 +24,8 @@ intents:
 # Temas de la KB, independientes de las intenciones (se validan al guardar bloques).
 categories: [payments, shipping]
 
-# Proveedor de LLM: google | anthropic. La API key va en el entorno
-# (GOOGLE_API_KEY / ANTHROPIC_API_KEY / GROQ_API_KEY), nunca aquí. Verificar el nombre del modelo vigente.
+# Proveedor de LLM: google | anthropic | groq | openrouter. La API key va en el entorno
+# (GOOGLE_API_KEY / ANTHROPIC_API_KEY / GROQ_API_KEY / OPENROUTER_API_KEY), nunca aquí. Verificar el nombre del modelo vigente.
 # Sin este bloque el agente funciona sin generación (respuestas en crudo).
 # llm:
 #   provider: google
@@ -38,6 +38,11 @@ categories: [payments, shipping]
 #   temperature: 0.2
 #   max_tokens: 1024
 #   timeout_seconds: 15
+
+# OpenRouter (saldo prepago; el modelo se escribe como proveedor/modelo):
+# llm:
+#   provider: openrouter
+#   model: google/gemini-2.5-flash-lite
 
 # Clasificador de intenciones con Jev (TypeSafe AI, lista de espera). Clave en TYPESAFE_API_KEY.
 # Ante fallo o confianza baja usa el clasificador por LLM. Los mensajes del cliente se envían a TypeSafe.
@@ -64,6 +69,6 @@ cors:
 
 channels: [web]
 connectors: []          # ids registrados en el registro de conectores (fase 4)
-media_enabled: false
+media_enabled: false      # true = audio e imágenes del cliente se pasan a texto con el LLM (provider openrouter, modelo multimodal)
 verify_responses: false   # true = un LLM verifica la respuesta contra la KB/datos antes de enviarla (+1 llamada)
 identity_entity_type: null   # ej. "pedido", "cuenta"

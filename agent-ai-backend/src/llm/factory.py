@@ -6,9 +6,15 @@ from src.llm.anthropic import AnthropicLLM
 from src.llm.base import LLMProvider
 from src.llm.google import GoogleGenAI
 from src.llm.groq import GroqLLM
+from src.llm.openrouter import OpenRouterLLM
 
-_KEY_VARS = {"google": "GOOGLE_API_KEY", "anthropic": "ANTHROPIC_API_KEY", "groq": "GROQ_API_KEY"}
-_CLASSES = {"google": GoogleGenAI, "anthropic": AnthropicLLM, "groq": GroqLLM}
+_KEY_VARS = {
+    "google": "GOOGLE_API_KEY",
+    "anthropic": "ANTHROPIC_API_KEY",
+    "groq": "GROQ_API_KEY",
+    "openrouter": "OPENROUTER_API_KEY",
+}
+_CLASSES = {"google": GoogleGenAI, "anthropic": AnthropicLLM, "groq": GroqLLM, "openrouter": OpenRouterLLM}
 
 
 def build_llm(cfg: LLMConfig | None, env: Mapping[str, str] | None = None) -> LLMProvider | None:

@@ -28,7 +28,10 @@ class WebChannel(MessagingChannel):
             user_id = str(data["user_id"])
         except (ValueError, KeyError, TypeError) as e:
             raise InvalidWebhook("se espera JSON con user_id y text") from e
-        media = [MediaItem(**m) for m in data.get("media", [])]
+        try:  # adjuntos como {"type": "audio"|"image", "url": "data:<mime>;base64,..."}
+            media = [MediaItem(**m) for m in data.get("media", [])]
+        except TypeError as e:
+            raise InvalidWebhook("media debe ser una lista de {type, url, mime_type, caption}") from e
         self.history[user_id].append({"role": "user", "text": data.get("text", "")})
         return [InboundEvent(
             channel=self.name, user_id=user_id,

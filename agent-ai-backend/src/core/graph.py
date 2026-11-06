@@ -58,7 +58,7 @@ def build_graph(
 
     g = StateGraph(ConversationState)
 
-    g.add_node("media", make_media_node())
+    g.add_node("media", make_media_node(llm, config.max_input_chars))
     g.add_node("identity", make_identity_node(config, entity_resolver))
     g.add_node("intent", make_intent_node(config, classifier, valid_issues))
     g.add_node("capture", make_capture_node(config))

@@ -24,7 +24,7 @@ Todo lo que no tiene default es obligatorio: el template no asume ningún negoci
 | `thresholds` | `sla_hours` y `session_timeout_minutes` (una conversación nueva empieza tras ese tiempo inactivo). |
 | `intents` | Intenciones habilitadas. `chat` y `escalate` son obligatorias. Cada una puede declarar `capture_fields` y `capture_before_answer` (default `false`: responder primero, pedir datos después). |
 | `categories` | Temas de la KB (opcionales). Distintos de las intenciones. |
-| `llm` | `provider` (`google`, `anthropic` o `groq`), `model` y opcionales `temperature`, `max_tokens`, `timeout_seconds` (default 30). Ver paso 4. |
+| `llm` | `provider` (`google`, `anthropic`, `groq` u `openrouter`), `model` y opcionales `temperature`, `max_tokens`, `timeout_seconds` (default 30). Ver paso 4. |
 | `channels` | `web` y/o `whatsapp_cloud_api`. |
 | `connectors` | Ids de conectores activos (paso 6). |
 | `max_input_chars` | Tope de caracteres por mensaje del cliente (default 2000); protege la cuota del LLM. |
@@ -66,13 +66,13 @@ en `/knowledge-blocks/{id}/versions` y rollback. Solo los bloques `published` ll
 
 ```yaml
 llm:
-  provider: google          # o anthropic, groq
+  provider: google          # o anthropic, groq, openrouter
   model: <modelo vigente>   # explícito; verificar el nombre actual en la documentación del proveedor
   timeout_seconds: 15       # opcional (default 30)
 ```
 
 ```bash
-export GOOGLE_API_KEY=...        # o ANTHROPIC_API_KEY / GROQ_API_KEY
+export GOOGLE_API_KEY=...        # o ANTHROPIC_API_KEY / GROQ_API_KEY / OPENROUTER_API_KEY
 ```
 
 Los tres proveedores reintentan solos hasta 2 veces (espera de 0,5 s y 1 s) ante 429, 5xx, errores de red y timeouts.

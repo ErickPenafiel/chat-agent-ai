@@ -171,7 +171,8 @@ class ApiService {
   // Web Channel Chat Playground
   async sendWebMessage(
     userId: string,
-    text: string
+    text: string,
+    media: Array<{ type: "image" | "audio"; url: string; mime_type?: string }> = []
   ): Promise<{
     processed: number
     replies: string[]
@@ -188,6 +189,7 @@ class ApiService {
       model?: string | null
       verification?: string | null
       unsupported_claims?: string[]
+      transcript?: string | null
     }>
   }> {
     return this.request<{
@@ -206,10 +208,11 @@ class ApiService {
         model?: string | null
         verification?: string | null
         unsupported_claims?: string[]
+        transcript?: string | null
       }>
     }>("/channels/web/webhook", {
       method: "POST",
-      body: JSON.stringify({ user_id: userId, text }),
+      body: JSON.stringify({ user_id: userId, text, media }),
     })
   }
 

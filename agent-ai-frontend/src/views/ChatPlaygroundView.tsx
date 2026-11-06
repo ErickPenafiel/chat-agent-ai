@@ -14,6 +14,8 @@ import {
   CopyIcon,
   MicIcon,
   MicOffIcon,
+  ImageIcon,
+  XIcon,
   PlusIcon,
   Trash2Icon,
   MessagesSquareIcon,
@@ -100,8 +102,36 @@ const thinkingSteps = [
   { step: 1, shortName: "Intención", label: "Análisis de Intención", desc: "Clasificando objetivo del mensaje con LangGraph...", icon: "🧠" },
   { step: 2, shortName: "RAG Semántico", label: "Base de Conocimiento", desc: "Recuperando bloques pertinentes de Lumbre Café...", icon: "🔍" },
   { step: 3, shortName: "Guardas", label: "Políticas y Guardas", desc: "Verificando límites de tokens y herramientas...", icon: "⚡" },
-  { step: 4, shortName: "Groq LLM", label: "Generación de Respuesta", desc: "Sintetizando con Groq (GPT-OSS-120B)...", icon: "✨" },
+  { step: 4, shortName: "LLM", label: "Generación de Respuesta", desc: "Sintetizando la respuesta con el modelo del tenant...", icon: "✨" },
 ]
+
+const MAX_VOICE_MS = 60_000
+const MAX_IMAGE_SIDE = 1280
+
+function readAsDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result))
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(blob)
+  })
+}
+
+// Reduce la imagen (lado mayor 1280 px, JPEG) para que el envío pese poco y entre en el límite del backend.
+async function shrinkImage(file: File): Promise<string> {
+  const bitmap = await createImageBitmap(file)
+  const scale = Math.min(1, MAX_IMAGE_SIDE / Math.max(bitmap.width, bitmap.height))
+  const canvas = document.createElement("canvas")
+  canvas.width = Math.round(bitmap.width * scale)
+  canvas.height = Math.round(bitmap.height * scale)
+  const ctx = canvas.getContext("2d")
+  if (!ctx) throw new Error("canvas no disponible")
+  ctx.fillStyle = "#fff" // los PNG con transparencia quedarían negros en JPEG
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+  bitmap.close()
+  return canvas.toDataURL("image/jpeg", 0.85)
+}
 
 export function ChatPlaygroundView({ backendOnline }: ChatPlaygroundViewProps) {
 
@@ -142,6 +172,9 @@ export function ChatPlaygroundView({ backendOnline }: ChatPlaygroundViewProps) {
   const [showTraceInChat, setShowTraceInChat] = React.useState(true)
   const [currentThoughtStep, setCurrentThoughtStep] = React.useState<number>(0)
   const [isRecordingVoice, setIsRecordingVoice] = React.useState(false)
+  const [pendingImage, setPendingImage] = React.useState<string | null>(null)
+  const recorderRef = React.useRef<MediaRecorder | null>(null)
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
 
   // Diagnóstico del último turno: solo datos reales del backend (o marcado como simulado sin backend).
   const [lastInspection, setLastInspection] = React.useState<{
@@ -163,7 +196,12 @@ export function ChatPlaygroundView({ backendOnline }: ChatPlaygroundViewProps) {
   // Guardar sesiones en localStorage
   React.useEffect(() => {
     try {
-      localStorage.setItem("agente_chat_sessions", JSON.stringify(sessions))
+      // Los adjuntos (base64) no se guardan: llenarían el almacenamiento del navegador.
+      const slim = sessions.map((s) => ({
+        ...s,
+        messages: s.messages.map((m) => ({ ...m, attachments: undefined })),
+      }))
+      localStorage.setItem("agente_chat_sessions", JSON.stringify(slim))
     } catch {
       /* ignore storage save error */
     }
@@ -318,19 +356,26 @@ export function ChatPlaygroundView({ backendOnline }: ChatPlaygroundViewProps) {
   }
 
   // Envío de mensaje con trazabilidad de acciones en tiempo real
-  const handleSendMessage = async (textToSend?: string) => {
-    const text = (textToSend || input).trim()
-    if (!text || isTyping) return
+  const handleSendMessage = async (textToSend?: string, voice?: { url: string; mime_type: string }) => {
+    const typed = (textToSend || input).trim()
+    const media = [
+      ...(voice ? [{ type: "audio" as const, ...voice }] : []),
+      ...(pendingImage ? [{ type: "image" as const, url: pendingImage, mime_type: "image/jpeg" }] : []),
+    ]
+    if ((!typed && media.length === 0) || isTyping) return
+    const text = typed || (voice ? "🎤 Nota de voz" : "📷 Imagen")
 
     const userMsg: ChatMessage = {
       id: generateMsgId(),
       sender: "user",
       text,
       timestamp: getFormattedTime(),
+      attachments: media.map(({ type, url }) => ({ type, url })),
     }
 
     setSessionMessages((prev) => [...prev, userMsg])
     setInput("")
+    setPendingImage(null)
 
     // eslint-disable-next-line react-hooks/purity -- se ejecuta en un manejador de evento, no durante el render
     const startTime = performance.now()
@@ -344,7 +389,7 @@ export function ChatPlaygroundView({ backendOnline }: ChatPlaygroundViewProps) {
       const fetchPromise = (async () => {
         if (backendOnline) {
           try {
-            const res = await api.sendWebMessage(activeSession.userId, text)
+            const res = await api.sendWebMessage(activeSession.userId, typed, media)
             return { res, error: null, ms: Math.round(performance.now() - startTime) }
           } catch (e) {
             return { res: null, error: e, ms: 0 }
@@ -390,6 +435,13 @@ export function ChatPlaygroundView({ backendOnline }: ChatPlaygroundViewProps) {
             : "Respuesta procesada correctamente."
         }
         detectedIntent = action?.intent ?? "desconocida"
+        if (media.length > 0) {
+          // Lo que el agente entendió del adjunto reemplaza al texto de relleno del mensaje.
+          const understood = action?.transcript?.trim()
+          const shown = understood ? `${voice && !typed ? "🎤 " : ""}${understood}` : text
+          setSessionMessages((prev) => prev.map((m) => (m.id === userMsg.id ? { ...m, text: shown } : m)))
+          if (!understood) toast.warning("El agente no pudo procesar el adjunto")
+        }
         const blockTitles = (action?.retrieved_blocks ?? []).map((b) => b.title)
         retrievedBlockName = blockTitles.join(", ")
         actionTrace = {
@@ -476,26 +528,49 @@ export function ChatPlaygroundView({ backendOnline }: ChatPlaygroundViewProps) {
 
 
   // Simular Nota de Voz (Speech-to-text)
-  const handleSimulateVoice = () => {
+  const handleToggleVoice = async () => {
     if (isRecordingVoice) {
-      setIsRecordingVoice(false)
+      recorderRef.current?.stop() // onstop envía el audio
       return
     }
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      toast.error("Este navegador no permite grabar audio")
+      return
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const recorder = new MediaRecorder(stream)
+      const chunks: Blob[] = []
+      recorder.ondataavailable = (e) => e.data.size > 0 && chunks.push(e.data)
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop())
+        clearTimeout(limit)
+        setIsRecordingVoice(false)
+        recorderRef.current = null
+        if (chunks.length === 0) return
+        const blob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" })
+        handleSendMessage(undefined, { url: await readAsDataUrl(blob), mime_type: blob.type })
+      }
+      const limit = setTimeout(() => recorder.state === "recording" && recorder.stop(), MAX_VOICE_MS)
+      recorderRef.current = recorder
+      recorder.start()
+      setIsRecordingVoice(true)
+    } catch {
+      toast.error("No se pudo acceder al micrófono. Revisa el permiso del navegador.")
+    }
+  }
 
-    setIsRecordingVoice(true)
-    toast.info("Grabando nota de voz del cliente...", { duration: 1800 })
-
-    setTimeout(() => {
-      setIsRecordingVoice(false)
-      const simulatedVoices = [
-        "Hola, quería saber qué costo tiene el kilo de café intenso y si llega hoy a mi domicilio.",
-        "Buenas tardes, quisiera consultar qué medios de pago tienen y si aceptan tarjeta.",
-        "Necesito cancelar mi suscripción por favor, no puedo gestionarla desde la web.",
-      ]
-      const chosen = simulatedVoices[Math.floor(Math.random() * simulatedVoices.length)]
-      setInput(chosen)
-      toast.success("Voz transcrita exitosamente al campo de mensaje")
-    }, 1800)
+  const handlePickImage = async (file: File | undefined) => {
+    if (!file) return
+    if (!file.type.startsWith("image/")) {
+      toast.error("Elige un archivo de imagen")
+      return
+    }
+    try {
+      setPendingImage(await shrinkImage(file))
+    } catch {
+      toast.error("No se pudo leer la imagen")
+    }
   }
 
   // Exportar transcripción
@@ -721,6 +796,13 @@ export function ChatPlaygroundView({ backendOnline }: ChatPlaygroundViewProps) {
                           : "bg-muted/70 text-foreground border rounded-tl-xs"
                       }`}
                     >
+                      {msg.attachments?.map((a, i) =>
+                        a.type === "image" ? (
+                          <img key={i} src={a.url} alt="Imagen enviada" className="mb-2 max-h-40 rounded-lg border" />
+                        ) : (
+                          <audio key={i} src={a.url} controls className="mb-2 h-9 max-w-full" />
+                        )
+                      )}
                       <p className="whitespace-pre-wrap">{msg.text}</p>
 
                       {/* Trazabilidad de Acciones del Agente (Compact Pills) */}
@@ -887,21 +969,60 @@ export function ChatPlaygroundView({ backendOnline }: ChatPlaygroundViewProps) {
             ))}
           </div>
 
+          {pendingImage && (
+            <div className="px-3 pt-3 border-t bg-card/60 flex items-center gap-2">
+              <img src={pendingImage} alt="Imagen por enviar" className="h-14 rounded-lg border object-cover" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-6 rounded-full"
+                onClick={() => setPendingImage(null)}
+                aria-label="Quitar imagen"
+              >
+                <XIcon className="size-3.5" />
+              </Button>
+            </div>
+          )}
+
           {/* Input de Mensaje */}
-          <div className="p-3 border-t bg-card/60 flex items-center gap-2">
+          <div className={`p-3 bg-card/60 flex items-center gap-2 ${pendingImage ? "" : "border-t"}`}>
             <Button
               variant={isRecordingVoice ? "destructive" : "outline"}
               size="icon"
-              onClick={handleSimulateVoice}
-              disabled={isTyping}
+              onClick={handleToggleVoice}
+              disabled={isTyping || !backendOnline}
               className="size-9 rounded-xl shrink-0"
-              title="Simular mensaje de audio con transcripción automática"
+              title={isRecordingVoice ? "Detener y enviar la nota de voz" : "Grabar una nota de voz (el agente la transcribe)"}
+              aria-label={isRecordingVoice ? "Detener grabación" : "Grabar nota de voz"}
             >
               {isRecordingVoice ? (
                 <MicOffIcon className="size-4 animate-pulse" />
               ) : (
                 <MicIcon className="size-4" />
               )}
+            </Button>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              data-testid="chat-image-input"
+              onChange={(e) => {
+                handlePickImage(e.target.files?.[0])
+                e.target.value = "" // permite elegir la misma imagen otra vez
+              }}
+            />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isTyping || !backendOnline}
+              className="size-9 rounded-xl shrink-0"
+              title="Adjuntar una imagen"
+              aria-label="Adjuntar imagen"
+            >
+              <ImageIcon className="size-4" />
             </Button>
 
             <Input
@@ -920,7 +1041,7 @@ export function ChatPlaygroundView({ backendOnline }: ChatPlaygroundViewProps) {
 
             <Button
               onClick={() => handleSendMessage()}
-              disabled={isTyping || !input.trim()}
+              disabled={isTyping || (!input.trim() && !pendingImage)}
               size="icon"
               className="size-9 rounded-xl shrink-0 shadow-xs"
             >

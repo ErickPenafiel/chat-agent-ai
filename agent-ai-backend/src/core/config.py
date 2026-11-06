@@ -32,7 +32,7 @@ class IntentConfig(_Strict):
 
 
 class LLMConfig(_Strict):
-    provider: Literal["google", "anthropic", "groq"]
+    provider: Literal["google", "anthropic", "groq", "openrouter"]
     model: str = Field(min_length=1)  # explícito: los nombres de modelo cambian y no se asume uno
     temperature: float = Field(default=0.2, ge=0, le=2)
     max_tokens: int = Field(default=1024, gt=0)

@@ -22,9 +22,11 @@ intents:
 categories: [products, shipping, payments, subscription]
 
 # LLM real (la clave va en el entorno, nunca aquí):
+#   OpenRouter, saldo prepago: OPENROUTER_API_KEY. Multimodal (texto, imagen, audio y video).
+#   Para volver a Groq (GROQ_API_KEY): provider: groq, model: openai/gpt-oss-120b
 llm:
-  provider: groq
-  model: openai/gpt-oss-120b
+  provider: openrouter
+  model: google/gemini-2.5-flash-lite
   timeout_seconds: 15  # con 2 reintentos el peor caso ronda los 45 s; en demo mejor fallar rápido
 
 
@@ -45,6 +47,6 @@ cors:
 
 channels: [web]
 connectors: []
-media_enabled: false
+media_enabled: true      # audio e imágenes del cliente se pasan a texto con el LLM (requiere un modelo multimodal)
 verify_responses: true   # guardrail anti-alucinación: +1 llamada al LLM por turno con KB/datos
 identity_entity_type: null

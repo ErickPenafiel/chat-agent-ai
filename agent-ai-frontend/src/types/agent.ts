@@ -92,5 +92,7 @@ export interface ChatMessage {
   retrieved_blocks?: string[]
   escalated?: boolean
   trace?: AgentActionTrace
+  // Archivos del cliente. Solo viven en memoria: no se guardan en localStorage por su tamaño.
+  attachments?: Array<{ type: "image" | "audio"; url: string }>
 }
 
